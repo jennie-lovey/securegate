@@ -173,17 +173,9 @@ export default function LoginForm() {
 
         {/* Password Input */}
         <div className="flex flex-col gap-1.5">
-          <div className="flex justify-between items-center">
-            <label htmlFor="password" className="text-sm font-medium text-[--text-secondary]">
-              Password
-            </label>
-            <Link
-              href="/forgot-password"
-              className="text-xs text-[--accent] hover:underline font-medium"
-            >
-              Forgot Password?
-            </Link>
-          </div>
+          <label htmlFor="password" className="text-sm font-medium text-[--text-secondary]">
+            Password
+          </label>
           <div className="relative">
             <input
               id="password"
@@ -207,6 +199,12 @@ export default function LoginForm() {
               {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </button>
           </div>
+          <Link
+            href="/forgot-password"
+            className="text-xs text-[--accent] hover:underline font-medium self-end"
+          >
+            Forgot Password?
+          </Link>
         </div>
 
         {/* Submit Button */}
