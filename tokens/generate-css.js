@@ -70,18 +70,7 @@ if (colorsData.color && colorsData.color.role) {
 
 cssContent += '}\n';
 
-// Dark Theme Colors
-if (colorsData.color && colorsData.color.role && colorsData.color.role.dark) {
-  cssContent += '\n@media (prefers-color-scheme: dark) {\n  :root {\n';
-  cssContent += '    /* Color Tokens - Dark Theme */\n';
-  const darkRoles = colorsData.color.role.dark;
-  for (const [roleName, roleValue] of Object.entries(darkRoles)) {
-    const resolvedColor = resolveColor(roleValue, colorDataRoot);
-    const cssVarName = `--color-${roleName.replace(/([A-Z])/g, '-$1').toLowerCase()}`;
-    cssContent += `    ${cssVarName}: ${resolvedColor};\n`;
-  }
-  cssContent += '  }\n}\n';
-}
+// Dark Theme Colors disabled for light-mode-only system
 
 fs.writeFileSync('tokens.css', cssContent);
 console.log('Successfully generated tokens.css!');

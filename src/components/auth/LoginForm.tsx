@@ -114,7 +114,7 @@ export default function LoginForm() {
   const isUnverifiedError = searchParams.get("error") === "unverified" || error?.includes("verified");
 
   return (
-    <div className="max-w-md w-full mx-auto p-8 rounded-2xl bg-[--bg-surface] border border-[--border] shadow-xl">
+    <div className="max-w-md w-full mx-auto p-8 rounded-2xl bg-[--bg-surface] border border-[--border]">
       <div className="mb-6 text-center">
         <h1 className="text-2xl font-semibold text-[--text-primary]">Welcome Back</h1>
         <p className="text-sm text-[--text-secondary] mt-1">Sign in to your SecureGate account</p>

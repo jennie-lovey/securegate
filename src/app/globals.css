@@ -7,8 +7,8 @@
 :root {
   /* Mapping design tokens to SecureGate design system variables */
   --bg-primary: var(--color-background);
-  --bg-surface: var(--color-surface-container-low);
-  --bg-surface-hover: var(--color-surface-container);
+  --bg-surface: var(--color-surface-container-lowest); /* Pure white #ffffff in light mode for cards */
+  --bg-surface-hover: var(--color-surface-container-low);
   --border: var(--color-outline-variant);
   --text-primary: var(--color-on-background);
   --text-secondary: var(--color-on-surface-variant);
