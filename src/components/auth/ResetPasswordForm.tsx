@@ -12,6 +12,7 @@ export default function ResetPasswordForm({ token }: { token: string }) {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [passwordFocused, setPasswordFocused] = useState(false);
 
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -144,6 +145,8 @@ export default function ResetPasswordForm({ token }: { token: string }) {
               disabled={isLoading}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              onFocus={() => setPasswordFocused(true)}
+              onBlur={() => setPasswordFocused(false)}
               placeholder="••••••••"
               className="w-full px-4 py-2.5 pr-11 rounded-lg bg-[--bg-primary] border border-[--border]
                          text-[--text-primary] placeholder:text-neutral-600
@@ -163,7 +166,7 @@ export default function ResetPasswordForm({ token }: { token: string }) {
               )}
             </button>
           </div>
-          <PasswordStrengthIndicator password={password} />
+          {passwordFocused && <PasswordStrengthIndicator password={password} />}
         </div>
 
         {/* Confirm Password */}

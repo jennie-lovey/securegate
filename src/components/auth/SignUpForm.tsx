@@ -10,6 +10,7 @@ export default function SignUpForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [passwordFocused, setPasswordFocused] = useState(false);
   
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -139,6 +140,8 @@ export default function SignUpForm() {
               disabled={isLoading}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              onFocus={() => setPasswordFocused(true)}
+              onBlur={() => setPasswordFocused(false)}
               placeholder="••••••••"
               className="w-full px-4 py-2.5 pr-11 rounded-lg bg-[--bg-primary] border border-[--border]
                          text-[--text-primary] placeholder:text-neutral-600
@@ -155,7 +158,7 @@ export default function SignUpForm() {
             </button>
           </div>
 
-          <PasswordStrengthIndicator password={password} />
+          {passwordFocused && <PasswordStrengthIndicator password={password} />}
         </div>
 
         {/* Submit Button */}
