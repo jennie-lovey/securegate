@@ -1,10 +1,9 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
-
-type Strength = "none" | "weak" | "fair" | "strong";
+import PasswordStrengthIndicator, { usePasswordStrength } from "./PasswordStrengthIndicator";
 
 export default function SignUpForm() {
   const [name, setName] = useState("");
@@ -16,40 +15,7 @@ export default function SignUpForm() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
-  // Password strength logic matching design system rules
-  const strength = useMemo<Strength>(() => {
-    if (!password) return "none";
-    
-    const hasLowercase = /[a-z]/.test(password);
-    const hasUppercase = /[A-Z]/.test(password);
-    const hasDigit = /[0-9]/.test(password);
-    const hasSymbol = /[^A-Za-z0-9]/.test(password);
-    
-    const classesCount = [hasLowercase, hasUppercase, hasDigit, hasSymbol].filter(Boolean).length;
-    
-    if (password.length < 8 || classesCount <= 1) {
-      return "weak";
-    }
-    
-    if (password.length >= 12 && classesCount >= 3) {
-      return "strong";
-    }
-    
-    return "fair";
-  }, [password]);
-
-  const strengthColour = useMemo(() => {
-    switch (strength) {
-      case "weak":
-        return "bg-[--error]";
-      case "fair":
-        return "bg-[--warning]";
-      case "strong":
-        return "bg-[--success]";
-      default:
-        return "bg-[--border]";
-    }
-  }, [strength]);
+  const strength = usePasswordStrength(password);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -189,21 +155,7 @@ export default function SignUpForm() {
             </button>
           </div>
 
-          {/* Three segment bar below the input */}
-          <div className="flex gap-1 mt-1.5">
-            <div className={`h-1 flex-1 rounded-full transition-colors duration-300 ${
-              strength !== 'none' ? strengthColour : 'bg-[--border]'
-            }`} />
-            <div className={`h-1 flex-1 rounded-full transition-colors duration-300 ${
-              strength === 'fair' || strength === 'strong' ? strengthColour : 'bg-[--border]'
-            }`} />
-            <div className={`h-1 flex-1 rounded-full transition-colors duration-300 ${
-              strength === 'strong' ? strengthColour : 'bg-[--border]'
-            }`} />
-          </div>
-          <p className="text-xs mt-1 text-[--text-secondary]">
-            {strength !== 'none' && `Password strength: ${strength}`}
-          </p>
+          <PasswordStrengthIndicator password={password} />
         </div>
 
         {/* Submit Button */}

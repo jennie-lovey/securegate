@@ -136,18 +136,23 @@ export default function VerifyEmailPage() {
                 </div>
               )}
 
-              <form onSubmit={handleResend} className="flex gap-2">
-                <input
-                  type="email"
-                  required
-                  placeholder="name@example.com"
-                  value={resendEmail}
-                  onChange={(e) => setResendEmail(e.target.value)}
-                  className="flex-1 px-3 py-2 text-sm rounded-lg bg-[--bg-primary] border border-[--border]
-                             text-[--text-primary] placeholder:text-neutral-600
-                             focus:outline-none focus:ring-2 focus:ring-[--accent]
-                             transition-all duration-150"
-                />
+              <form onSubmit={handleResend} className="flex flex-col gap-2">
+                <label htmlFor="resend-email" className="sr-only">
+                  Email Address
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    id="resend-email"
+                    type="email"
+                    required
+                    placeholder="name@example.com"
+                    value={resendEmail}
+                    onChange={(e) => setResendEmail(e.target.value)}
+                    className="flex-1 px-3 py-2 text-sm rounded-lg bg-[--bg-primary] border border-[--border]
+                               text-[--text-primary] placeholder:text-neutral-600
+                               focus:outline-none focus:ring-2 focus:ring-[--accent]
+                               transition-all duration-150"
+                  />
                 <button
                   type="submit"
                   disabled={resendLoading}
@@ -155,6 +160,7 @@ export default function VerifyEmailPage() {
                 >
                   {resendLoading ? <Loader2 className="h-3 w-3 animate-spin" /> : "Request"}
                 </button>
+                </div>
               </form>
             </div>
 

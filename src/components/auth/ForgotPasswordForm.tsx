@@ -1,0 +1,127 @@
+"use client";
+
+import { useState } from "react";
+import Link from "next/link";
+import { Loader2, ArrowLeft } from "lucide-react";
+
+export default function ForgotPasswordForm() {
+  const [email, setEmail] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError(null);
+    setSuccess(null);
+
+    if (!email.trim() || !email.includes("@")) {
+      setError("Please enter a valid email address.");
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      const res = await fetch("/api/auth/forgot-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email.trim().toLowerCase() }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.error || "Failed to process request. Please try again.");
+      } else {
+        setSuccess(
+          data.message ||
+            "If an account exists with that email, a reset link has been sent."
+        );
+        setEmail("");
+      }
+    } catch (err) {
+      console.error("[forgot-password-form]", err);
+      setError("A network error occurred. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div className="max-w-md w-full mx-auto p-8 rounded-2xl bg-[--bg-surface] border border-[--border]">
+      <div className="mb-6 text-center">
+        <h1 className="text-2xl font-semibold text-[--text-primary]">
+          Forgot Password
+        </h1>
+        <p className="text-sm text-[--text-secondary] mt-1">
+          Enter your email and we&apos;ll send you a password reset link
+        </p>
+      </div>
+
+      {error && (
+        <div className="p-3 mb-4 rounded-lg bg-red-950/40 border border-red-800/50 text-sm text-red-400">
+          {error}
+        </div>
+      )}
+
+      {success && (
+        <div className="p-3 mb-4 rounded-lg bg-green-950/40 border border-green-800/50 text-sm text-green-400">
+          {success}
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <div className="flex flex-col gap-1.5">
+          <label
+            htmlFor="email"
+            className="text-sm font-medium text-[--text-secondary]"
+          >
+            Email Address
+          </label>
+          <input
+            id="email"
+            type="email"
+            autoComplete="email"
+            required
+            disabled={isLoading}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="name@example.com"
+            className="w-full px-4 py-2.5 rounded-lg bg-[--bg-primary] border border-[--border]
+                       text-[--text-primary] placeholder:text-neutral-600
+                       focus:outline-none focus:ring-2 focus:ring-[--accent]
+                       transition-all duration-150 disabled:opacity-50"
+          />
+        </div>
+
+        <button
+          type="submit"
+          disabled={isLoading}
+          className="w-full py-2.5 px-4 rounded-lg bg-[--accent] hover:bg-[--accent-hover]
+                     text-white font-medium text-sm transition-colors duration-150
+                     disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-2"
+        >
+          {isLoading ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Please wait...
+            </>
+          ) : (
+            "Send Reset Link"
+          )}
+        </button>
+      </form>
+
+      <div className="mt-6 text-center">
+        <Link
+          href="/login"
+          className="inline-flex items-center gap-1.5 text-sm text-[--accent] hover:underline font-medium"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back to Sign In
+        </Link>
+      </div>
+    </div>
+  );
+}

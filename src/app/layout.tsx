@@ -1,16 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Mulish } from "next/font/google";
 import "./globals.css";
-
-const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-inter",
-});
-
-const mulish = Mulish({
-  subsets: ["latin"],
-  variable: "--font-mulish",
-});
 
 export const metadata: Metadata = {
   title: "SecureGate - Secure Authentication System",
@@ -23,7 +12,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${inter.variable} ${mulish.variable}`}>
+    <html lang="en">
       <body>{children}</body>
     </html>
   );
