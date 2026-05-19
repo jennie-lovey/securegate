@@ -131,7 +131,7 @@ export default function VerifyEmailPage() {
               )}
 
               {resendSuccess && (
-                <div className="p-2.5 mb-3 rounded-lg bg-green-50 border border-green-200 text-xs text-green-700">
+                <div className="p-2.5 mb-3 rounded-lg bg-gray-100 border border-gray-300 text-xs text-gray-700">
                   {resendSuccess}
                 </div>
               )}
