@@ -121,7 +121,7 @@ export default function LoginForm() {
       </div>
 
       {error && (
-        <div className="p-3 mb-4 rounded-lg bg-red-950/40 border border-red-800/50 text-sm text-red-400 flex flex-col gap-2">
+        <div className="p-3 mb-4 rounded-lg bg-red-50 border border-red-200 text-sm text-red-700 flex flex-col gap-2">
           <span>{error}</span>
           {isUnverifiedError && (
             <button
@@ -144,7 +144,7 @@ export default function LoginForm() {
       )}
 
       {success && (
-        <div className="p-3 mb-4 rounded-lg bg-green-950/40 border border-green-800/50 text-sm text-green-400">
+        <div className="p-3 mb-4 rounded-lg bg-green-50 border border-green-200 text-sm text-green-700">
           {success}
         </div>
       )}

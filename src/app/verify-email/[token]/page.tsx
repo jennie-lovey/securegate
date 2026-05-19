@@ -116,7 +116,7 @@ export default function VerifyEmailPage() {
           <div className="flex flex-col items-center gap-4 py-4">
             <XCircle className="h-16 w-16 text-[--error]" />
             <h1 className="text-2xl font-semibold text-[--text-primary]">Verification Failed</h1>
-            <p className="text-sm text-[--error] bg-red-950/20 border border-red-800/30 p-3 rounded-lg w-full">
+            <p className="text-sm text-red-700 bg-red-50 border border-red-200 p-3 rounded-lg w-full">
               {errorMessage}
             </p>
 
@@ -125,13 +125,13 @@ export default function VerifyEmailPage() {
               <h2 className="text-sm font-semibold text-[--text-primary] mb-2">Request new verification link</h2>
               
               {resendError && (
-                <div className="p-2.5 mb-3 rounded-lg bg-red-950/40 border border-red-800/50 text-xs text-red-400">
+                <div className="p-2.5 mb-3 rounded-lg bg-red-50 border border-red-200 text-xs text-red-700">
                   {resendError}
                 </div>
               )}
 
               {resendSuccess && (
-                <div className="p-2.5 mb-3 rounded-lg bg-green-950/40 border border-green-800/50 text-xs text-green-400">
+                <div className="p-2.5 mb-3 rounded-lg bg-green-50 border border-green-200 text-xs text-green-700">
                   {resendSuccess}
                 </div>
               )}

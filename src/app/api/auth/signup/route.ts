@@ -47,32 +47,31 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     });
 
     if (existingUser) {
-      // SECURITY: To prevent email enumeration, do NOT tell the client the email exists.
-      // Instead, return success message but send a notification email informing the user they already have an account.
-      const { Resend } = await import("resend");
-      const resend = new Resend(process.env.RESEND_API_KEY || "re_mock_key");
-      const loginUrl = `${process.env.NEXTAUTH_URL || "http://localhost:3000"}/login`;
-
-      if (process.env.NODE_ENV === "development" || !process.env.RESEND_API_KEY || process.env.RESEND_API_KEY.startsWith("re_mock")) {
+      if (!process.env.RESEND_API_KEY || process.env.RESEND_API_KEY.startsWith("re_mock")) {
         console.log(`\n[EMAIL MOCK] Account already exists notification to: ${normalizedEmail}`);
-      }
+      } else {
+        const loginUrl = `${process.env.NEXTAUTH_URL || "http://localhost:3000"}/login`;
 
-      try {
-        await resend.emails.send({
-          from: "SecureGate <onboarding@resend.dev>",
-          to: normalizedEmail,
-          subject: "SecureGate account already exists",
-          html: `
-            <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 8px; background-color: #ffffff; color: #333333;">
-              <h2 style="color: #6366f1;">Account Already Exists</h2>
-              <p>Someone (hopefully you) tried to sign up for an account on SecureGate using this email address.</p>
-              <p>Since an account already exists with this email address, you can log in directly or reset your password if you forgot it.</p>
-              <a href="${loginUrl}" style="display: inline-block; background-color: #6366f1; color: white; padding: 10px 20px; text-decoration: none; border-radius: 6px; font-weight: bold; margin-top: 10px;">Log In</a>
-            </div>
-          `,
-        });
-      } catch (err) {
-        console.error("[signup] Failed sending existing email notification:", err);
+        try {
+          const { Resend } = await import("resend");
+          const resend = new Resend(process.env.RESEND_API_KEY);
+          const from = process.env.RESEND_FROM_ADDRESS || "SecureGate <onboarding@resend.dev>";
+          await resend.emails.send({
+            from,
+            to: normalizedEmail,
+            subject: "SecureGate account already exists",
+            html: `
+              <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 8px; background-color: #ffffff; color: #333333;">
+                <h2 style="color: #6366f1;">Account Already Exists</h2>
+                <p>Someone (hopefully you) tried to sign up for an account on SecureGate using this email address.</p>
+                <p>Since an account already exists with this email address, you can log in directly or reset your password if you forgot it.</p>
+                <a href="${loginUrl}" style="display: inline-block; background-color: #6366f1; color: white; padding: 10px 20px; text-decoration: none; border-radius: 6px; font-weight: bold; margin-top: 10px;">Log In</a>
+              </div>
+            `,
+          });
+        } catch (err) {
+          console.error("[signup] Failed sending existing email notification:", err);
+        }
       }
 
       return NextResponse.json(

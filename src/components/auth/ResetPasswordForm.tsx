@@ -116,13 +116,13 @@ export default function ResetPasswordForm({ token }: { token: string }) {
       </div>
 
       {error && (
-        <div className="p-3 mb-4 rounded-lg bg-red-950/40 border border-red-800/50 text-sm text-red-400">
+        <div className="p-3 mb-4 rounded-lg bg-red-50 border border-red-200 text-sm text-red-700">
           {error}
         </div>
       )}
 
       {success && (
-        <div className="p-3 mb-4 rounded-lg bg-green-950/40 border border-green-800/50 text-sm text-green-400">
+        <div className="p-3 mb-4 rounded-lg bg-green-50 border border-green-200 text-sm text-green-700">
           {success}
         </div>
       )}
