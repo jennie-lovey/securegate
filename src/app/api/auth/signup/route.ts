@@ -108,14 +108,11 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     // 6. Send OTP via email
     const emailSent = await sendVerificationEmail(normalizedEmail, otp);
 
-    if (!emailSent.success) {
-      console.error("[signup] Verification email failed to send.");
-    }
-
     return NextResponse.json(
       {
-        message: "Account created! Check your email for the verification code.",
+        message: "Account created! Use the code below to verify your email.",
         email: normalizedEmail,
+        code: otp,
       },
       { status: 200 }
     );

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { Eye, EyeOff, Loader2, ExternalLink } from "lucide-react";
 import PasswordStrengthIndicator, { usePasswordStrength } from "./PasswordStrengthIndicator";
 
 export default function SignUpForm() {
@@ -15,6 +15,8 @@ export default function SignUpForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [verifyCode, setVerifyCode] = useState<string | null>(null);
+  const [signedUpEmail, setSignedUpEmail] = useState<string | null>(null);
 
   const strength = usePasswordStrength(password);
 
@@ -53,7 +55,9 @@ export default function SignUpForm() {
       if (!res.ok) {
         setError(data.error || "Failed to create account. Please try again.");
       } else {
-        setSuccess(data.message || "Account created! Check your email for the verification link.");
+        setSuccess(data.message);
+        if (data.code) setVerifyCode(data.code);
+        if (data.email) setSignedUpEmail(data.email);
         setName("");
         setEmail("");
         setPassword("");
@@ -82,6 +86,24 @@ export default function SignUpForm() {
       {success && (
         <div className="p-4 mb-4 rounded-lg bg-[#fafafa] border border-gray-200 text-sm text-black space-y-2">
           <p>{success}</p>
+          {verifyCode && (
+            <div className="text-center py-3">
+              <span className="text-2xl font-bold tracking-[8px] text-[--accent]">{verifyCode}</span>
+            </div>
+          )}
+          {verifyCode && (
+            <p className="text-xs text-[--text-secondary]">
+              Use this code on the verification page or click the link sent to your email.
+            </p>
+          )}
+          {verifyCode && signedUpEmail && (
+            <Link
+              href={`/verify-email?email=${encodeURIComponent(signedUpEmail)}`}
+              className="inline-block mt-1 px-4 py-2 rounded-lg bg-[--accent] hover:bg-[--accent-hover] text-white font-medium text-xs text-center transition-colors"
+            >
+              Go to verification page
+            </Link>
+          )}
         </div>
       )}
 
