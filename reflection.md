@@ -2,7 +2,7 @@
 **Name:** [Anthony jennifer]
 **Cohort:** Design to MVP Bootcamp
 **Live URL:** ttps://securegate-hgya.vercel.app/signup
-**GitHub Repo:** [Your repo URL]
+**GitHub Repo:** https://github.com/jennie-lovey/securegate
 ---
 ## Part 1 — What I Built
 [SecureGate is a focused authentication system built with Next.js, NextAuth, Prisma, PostgreSQL, and Resend. It handles sign up, email verification, login, password reset, rate limiting, and protected routes. The goal was not to build a full product, but to deeply understand how secure identity systems behave in real applications]
@@ -32,10 +32,16 @@ Attackers could brute force logins or users could stay logged in indefinitely,cr
 ### Q2 — Law of Leaky AbstractionsMy Answer:
 NextAuth hides session handling, but I still had to manually map token data into the session. The abstraction leaks when I need to control what exists inside the session object.
 
+What goes wrong if ignored:
+User sessions may lose identity fields or behave inconsistently across requests.
+
+
 
 
 ## Part 4 — One Thing I Would Refactor
-[would split the auth logic into smaller files (providers, callbacks, and config) to make it cleaner and easier to maintain.]
+My Answer:
+I did not add social login or MFA because SecureGate only requires basic authentication flows. Adding them early would add unnecessary complexity.
+
 
 ## Part 5 — How This Changes How I Build
 I now understand that authentication is sensitive and tightly connected to security and user sessions, so even small mistakes can break login flow or create security risks.
