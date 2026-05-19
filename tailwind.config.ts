@@ -8,6 +8,26 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      colors: {
+        background: "var(--bg-primary)",
+        foreground: "var(--text-primary)",
+        surface: {
+          DEFAULT: "var(--bg-surface)",
+          hover: "var(--bg-surface-hover)",
+        },
+        border: "var(--border)",
+        text: {
+          primary: "var(--text-primary)",
+          secondary: "var(--text-secondary)",
+        },
+        accent: {
+          DEFAULT: "var(--accent)",
+          hover: "var(--accent-hover)",
+        },
+        error: "var(--error)",
+        success: "var(--success)",
+        warning: "var(--warning)",
+      },
       backgroundImage: {
         "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
         "gradient-conic":

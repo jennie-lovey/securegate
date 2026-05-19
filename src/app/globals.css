@@ -1,33 +1,34 @@
+@import "../../tokens/tokens.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
-  }
+  /* Mapping design tokens to SecureGate design system variables */
+  --bg-primary: var(--color-background);
+  --bg-surface: var(--color-surface-container-low);
+  --bg-surface-hover: var(--color-surface-container);
+  --border: var(--color-outline-variant);
+  --text-primary: var(--color-on-background);
+  --text-secondary: var(--color-on-surface-variant);
+  
+  /* Accent/Primary buttons */
+  --accent: var(--color-primary);
+  --accent-hover: hsl(243, 52%, 42%);
+  
+  /* Status Colors */
+  --error: var(--color-error);
+  --success: var(--color-tertiary);
+  --warning: var(--color-secondary);
 }
 
 body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
-}
-
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
+  color: var(--text-primary);
+  background-color: var(--bg-primary);
+  font-family: var(--font-inter), var(--font-display-large-family), sans-serif;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
