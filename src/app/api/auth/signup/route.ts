@@ -117,10 +117,10 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       { message: "Check your email for a verification link." },
       { status: 200 }
     );
-  } catch (error: any) {
+  } catch (error) {
     console.error("[signup]", error);
     return NextResponse.json(
-      { error: `[DEBUG] ${error.message || String(error)}` },
+      { error: "Something went wrong. Please try again." },
       { status: 500 }
     );
   }
