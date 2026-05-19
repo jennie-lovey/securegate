@@ -6,7 +6,7 @@ import { getSignupRateLimiter } from "@/lib/rate-limit";
 import { generateToken, verificationExpiry } from "@/lib/tokens";
 import { sendVerificationEmail } from "@/lib/email";
 import { SALT_ROUNDS } from "@/lib/constants";
-import { Resend } from "resend";
+
 
 const signUpSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -49,6 +49,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     if (existingUser) {
       // SECURITY: To prevent email enumeration, do NOT tell the client the email exists.
       // Instead, return success message but send a notification email informing the user they already have an account.
+      const { Resend } = await import("resend");
       const resend = new Resend(process.env.RESEND_API_KEY || "re_mock_key");
       const loginUrl = `${process.env.NEXTAUTH_URL || "http://localhost:3000"}/login`;
 
