@@ -2,12 +2,10 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import PasswordStrengthIndicator, { usePasswordStrength } from "./PasswordStrengthIndicator";
 
 export default function SignUpForm() {
-  const router = useRouter();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -16,6 +14,7 @@ export default function SignUpForm() {
   
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
 
   const strength = usePasswordStrength(password);
 
@@ -23,6 +22,7 @@ export default function SignUpForm() {
     e.preventDefault();
     setIsLoading(true);
     setError(null);
+    setSuccess(null);
 
     // Basic client validation
     if (!name.trim()) {
@@ -53,8 +53,10 @@ export default function SignUpForm() {
       if (!res.ok) {
         setError(data.error || "Failed to create account. Please try again.");
       } else {
-        const emailParam = data.email || email.trim().toLowerCase();
-        router.push(`/verify-email?email=${encodeURIComponent(emailParam)}`);
+        setSuccess(data.message || "Account created! Check your email for the verification link.");
+        setName("");
+        setEmail("");
+        setPassword("");
       }
     } catch (err) {
       console.error("[signup-form]", err);
@@ -74,6 +76,12 @@ export default function SignUpForm() {
       {error && (
         <div className="p-3 mb-4 rounded-lg bg-red-50 border border-red-200 text-sm text-red-700">
           {error}
+        </div>
+      )}
+
+      {success && (
+        <div className="p-4 mb-4 rounded-lg bg-[#fafafa] border border-gray-200 text-sm text-black space-y-2">
+          <p>{success}</p>
         </div>
       )}
 
