@@ -4,7 +4,7 @@ import bcrypt from "bcryptjs";
 import { z } from "zod";
 import { headers } from "next/headers";
 import { prisma } from "./prisma";
-import { getLoginRateLimiter } from "./rate-limit";
+import { getLoginRateLimiter, getClientIp } from "./rate-limit";
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email format"),
@@ -21,7 +21,7 @@ export const authOptions: NextAuthOptions = {
       },
       async authorize(credentials) {
         // 1. Rate Limit check
-        const ip = headers().get("x-forwarded-for") ?? "127.0.0.1";
+        const ip = getClientIp(headers());
         const limiter = await getLoginRateLimiter();
         const limitResult = await limiter.limit(ip);
         if (!limitResult.success) {

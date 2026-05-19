@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
-import { getResetPasswordRateLimiter } from "@/lib/rate-limit";
+import { getResetPasswordRateLimiter, getClientIp } from "@/lib/rate-limit";
 import { SALT_ROUNDS } from "@/lib/constants";
 
 const resetPasswordSchema = z.object({
@@ -12,7 +12,7 @@ const resetPasswordSchema = z.object({
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
   // 1. Rate Limit check
-  const ip = req.headers.get("x-forwarded-for") ?? "127.0.0.1";
+  const ip = getClientIp(req.headers);
   const limiter = await getResetPasswordRateLimiter();
   const limitResult = await limiter.limit(ip);
   if (!limitResult.success) {

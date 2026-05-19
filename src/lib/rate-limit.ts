@@ -49,48 +49,78 @@ async function getUpstash() {
   }
 }
 
+export function getClientIp(headersObj: { get: (name: string) => string | null }): string {
+  const xRealIp = headersObj.get("x-real-ip");
+  if (xRealIp) return xRealIp.trim();
+  
+  const xForwardedFor = headersObj.get("x-forwarded-for");
+  if (xForwardedFor) {
+    const ips = xForwardedFor.split(",");
+    const clientIp = ips[0]?.trim();
+    if (clientIp) return clientIp;
+  }
+  
+  return "127.0.0.1";
+}
+
 async function createRateLimiter(limitCount: number, windowStr: string, windowMs: number): Promise<RateLimiterInstance> {
+  const fallback = new MemoryRateLimiter(limitCount, windowMs);
   const redis = await getUpstash();
   if (redis) {
     try {
       const { Ratelimit } = await import("@upstash/ratelimit");
-      return new Ratelimit({
+      const primary = new Ratelimit({
         redis,
         limiter: Ratelimit.slidingWindow(limitCount, windowStr as any),
         analytics: true,
       });
+      return {
+        limit: async (ip: string) => {
+          try {
+            return await primary.limit(ip);
+          } catch (error) {
+            console.error("[rate-limit] Upstash limit check failed, using memory fallback:", error);
+            return await fallback.limit(ip);
+          }
+        }
+      };
     } catch (error) {
-      console.error("[rate-limit] Upstash ratelimit initialization failed, using fallback:", error);
+      console.error("[rate-limit] Upstash ratelimit initialization failed, using memory fallback:", error);
     }
   }
-  return new MemoryRateLimiter(limitCount, windowMs);
+  return fallback;
 }
 
-// Lazy initialization — Upstash packages are only imported on first request
+// Lazy initialization globals
 let _loginRateLimiter: RateLimiterInstance | null = null;
 let _signupRateLimiter: RateLimiterInstance | null = null;
 let _forgotPasswordRateLimiter: RateLimiterInstance | null = null;
 let _resetPasswordRateLimiter: RateLimiterInstance | null = null;
 
-async function getOrInit<T>(cache: { value: T | null }, factory: () => Promise<T>): Promise<T> {
-  if (!cache.value) {
-    cache.value = await factory();
-  }
-  return cache.value;
-}
-
 export async function getLoginRateLimiter() {
-  return getOrInit({ value: _loginRateLimiter }, () => createRateLimiter(5, "10 m", 10 * 60 * 1000));
+  if (!_loginRateLimiter) {
+    _loginRateLimiter = await createRateLimiter(5, "10 m", 10 * 60 * 1000);
+  }
+  return _loginRateLimiter;
 }
 
 export async function getSignupRateLimiter() {
-  return getOrInit({ value: _signupRateLimiter }, () => createRateLimiter(10, "1 h", 60 * 60 * 1000));
+  if (!_signupRateLimiter) {
+    _signupRateLimiter = await createRateLimiter(10, "1 h", 60 * 60 * 1000);
+  }
+  return _signupRateLimiter;
 }
 
 export async function getForgotPasswordRateLimiter() {
-  return getOrInit({ value: _forgotPasswordRateLimiter }, () => createRateLimiter(3, "15 m", 15 * 60 * 1000));
+  if (!_forgotPasswordRateLimiter) {
+    _forgotPasswordRateLimiter = await createRateLimiter(3, "15 m", 15 * 60 * 1000);
+  }
+  return _forgotPasswordRateLimiter;
 }
 
 export async function getResetPasswordRateLimiter() {
-  return getOrInit({ value: _resetPasswordRateLimiter }, () => createRateLimiter(5, "15 m", 15 * 60 * 1000));
+  if (!_resetPasswordRateLimiter) {
+    _resetPasswordRateLimiter = await createRateLimiter(5, "15 m", 15 * 60 * 1000);
+  }
+  return _resetPasswordRateLimiter;
 }
