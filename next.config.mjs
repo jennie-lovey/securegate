@@ -7,6 +7,12 @@ const securityHeaders = [
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  experimental: {
+    outputFileTracingIncludes: {
+      "/*": ["./node_modules/@prisma/engines/**", "./node_modules/prisma/**"],
+      "/api/**": ["./node_modules/@prisma/engines/**", "./node_modules/prisma/**"],
+    },
+  },
   async headers() {
     return [
       {
