@@ -8,12 +8,13 @@ function getFromAddress(): string {
 export async function sendVerificationEmail(email: string, otp: string) {
   const verifyLink = `${process.env.NEXTAUTH_URL || "http://localhost:3000"}/verify-email?email=${encodeURIComponent(email)}`;
 
+  console.log("\n=========================================");
+  console.log(`[VERIFICATION CODE] Email: ${email}`);
+  console.log(`Link: ${verifyLink}`);
+  console.log(`Code: ${otp}`);
+  console.log("=========================================\n");
+
   if (!process.env.RESEND_API_KEY || process.env.RESEND_API_KEY.startsWith("re_mock")) {
-    console.log("\n=========================================");
-    console.log(`[EMAIL SEND MOCK] Verification email to: ${email}`);
-    console.log(`Verification link: ${verifyLink}`);
-    console.log(`Your verification code is: ${otp}`);
-    console.log("=========================================\n");
     return { success: true, data: null };
   }
 
