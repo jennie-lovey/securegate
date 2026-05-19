@@ -107,9 +107,17 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
     // 6. Send verification email via Resend
     const emailSent = await sendVerificationEmail(normalizedEmail, token);
+    const verifyUrl = `${process.env.NEXTAUTH_URL || "http://localhost:3000"}/verify-email/${token}`;
+
     if (!emailSent.success) {
-      // Log but don't fail the registration endpoint; the user can trigger verification link resend.
-      console.error("[signup] Verification email failed to send.");
+      console.error("[signup] Verification email failed to send. Provide the link directly.");
+      return NextResponse.json(
+        {
+          message: "Account created! Check your email for a verification link.",
+          verifyUrl,
+        },
+        { status: 200 }
+      );
     }
 
     return NextResponse.json(

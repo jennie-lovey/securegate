@@ -15,6 +15,7 @@ export default function SignUpForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [verifyUrl, setVerifyUrl] = useState<string | null>(null);
 
   const strength = usePasswordStrength(password);
 
@@ -54,6 +55,7 @@ export default function SignUpForm() {
         setError(data.error || "Failed to create account. Please try again.");
       } else {
         setSuccess(data.message || "Account created! Check your email for a verification link.");
+        if (data.verifyUrl) setVerifyUrl(data.verifyUrl);
         setName("");
         setEmail("");
         setPassword("");
@@ -80,8 +82,16 @@ export default function SignUpForm() {
       )}
 
       {success && (
-        <div className="p-3 mb-4 rounded-lg bg-gray-50 border border-gray-200 text-sm text-black">
-          {success}
+        <div className="p-4 mb-4 rounded-lg bg-[#fafafa] border border-gray-200 text-sm text-black space-y-2">
+          <p>{success}</p>
+          {verifyUrl && (
+            <a
+              href={verifyUrl}
+              className="inline-block mt-1 px-4 py-2 rounded-lg bg-[--accent] hover:bg-[--accent-hover] text-white font-medium text-xs transition-colors"
+            >
+              Click here to verify your email
+            </a>
+          )}
         </div>
       )}
 
