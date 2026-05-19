@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { getForgotPasswordRateLimiter, getClientIp } from "@/lib/rate-limit";
-import { generateToken, verificationExpiry } from "@/lib/tokens";
+import { generateOtp, verificationExpiry } from "@/lib/tokens";
 import { sendVerificationEmail } from "@/lib/email";
 
 const resendSchema = z.object({
@@ -58,20 +58,20 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       // Ignore if none found
     }
 
-    // Generate new token & expiry
-    const token = generateToken();
+    // Generate new OTP & expiry
+    const otp = generateOtp();
     const expires = verificationExpiry();
 
     await prisma.verificationToken.create({
       data: {
         identifier: normalizedEmail,
-        token,
+        token: otp,
         expires,
       },
     });
 
     // Send the email
-    await sendVerificationEmail(normalizedEmail, token);
+    await sendVerificationEmail(normalizedEmail, otp);
 
     return successResponse;
   } catch (error) {

@@ -3,7 +3,8 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 
 const verifySchema = z.object({
-  token: z.string().min(1, "Token is required"),
+  email: z.string().email("Invalid email format"),
+  code: z.string().length(5, "Verification code must be 5 digits"),
 });
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
@@ -14,39 +15,38 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     const result = verifySchema.safeParse(body);
     if (!result.success) {
       return NextResponse.json(
-        { error: "Invalid token data" },
+        { error: result.error.errors[0]?.message ?? "Invalid input" },
         { status: 400 }
       );
     }
 
-    const { token } = result.data;
+    const { email, code } = result.data;
+    const normalizedEmail = email.trim().toLowerCase();
 
-    // Look up token in database
+    // Look up OTP in database
     const verificationToken = await prisma.verificationToken.findUnique({
-      where: { token },
+      where: { identifier_token: { identifier: normalizedEmail, token: code } },
     });
 
     if (!verificationToken) {
       return NextResponse.json(
-        { error: "Invalid verification link. It may have already been used." },
+        { error: "Invalid verification code. Please check and try again." },
         { status: 400 }
       );
     }
 
     // Check token expiry
     if (new Date() > verificationToken.expires) {
-      // Keep expired token in DB or let the user delete/cleanup?
-      // Better to delete it so it cannot be re-checked, and return expired error.
       try {
         await prisma.verificationToken.delete({
-          where: { token },
+          where: { identifier_token: { identifier: normalizedEmail, token: code } },
         });
       } catch (err) {
         console.error("[verify-email] Cleanup of expired token failed:", err);
       }
 
       return NextResponse.json(
-        { error: "Verification link has expired. Please request a new one." },
+        { error: "Verification code has expired. Please request a new one." },
         { status: 400 }
       );
     }
@@ -54,12 +54,12 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     // Update User.emailVerified and delete the consumed token in a transaction
     await prisma.$transaction(async (tx) => {
       await tx.user.update({
-        where: { email: verificationToken.identifier },
+        where: { email: normalizedEmail },
         data: { emailVerified: new Date() },
       });
 
       await tx.verificationToken.delete({
-        where: { token },
+        where: { identifier_token: { identifier: normalizedEmail, token: code } },
       });
     });
 

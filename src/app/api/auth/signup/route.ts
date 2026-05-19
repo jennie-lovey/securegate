@@ -3,7 +3,7 @@ import bcrypt from "bcryptjs";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { getSignupRateLimiter, getClientIp } from "@/lib/rate-limit";
-import { generateToken, verificationExpiry } from "@/lib/tokens";
+import { generateOtp, verificationExpiry } from "@/lib/tokens";
 import { sendVerificationEmail } from "@/lib/email";
 import { SALT_ROUNDS } from "@/lib/constants";
 
@@ -84,7 +84,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
 
     // 5. Create new User & VerificationToken in transaction
-    const token = generateToken();
+    const otp = generateOtp();
     const expires = verificationExpiry();
 
     await prisma.$transaction(async (tx) => {
@@ -99,15 +99,14 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       await tx.verificationToken.create({
         data: {
           identifier: normalizedEmail,
-          token,
+          token: otp,
           expires,
         },
       });
     });
 
-    // 6. Send verification email via Resend
-    const verifyUrl = `${process.env.NEXTAUTH_URL || "http://localhost:3000"}/verify-email/${token}`;
-    const emailSent = await sendVerificationEmail(normalizedEmail, token);
+    // 6. Send OTP via email
+    const emailSent = await sendVerificationEmail(normalizedEmail, otp);
 
     if (!emailSent.success) {
       console.error("[signup] Verification email failed to send.");
@@ -115,8 +114,8 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
     return NextResponse.json(
       {
-        message: "Account created! Verify your email to continue.",
-        verifyUrl,
+        message: "Account created! Check your email for the verification code.",
+        email: normalizedEmail,
       },
       { status: 200 }
     );

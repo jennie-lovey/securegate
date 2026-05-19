@@ -2,10 +2,12 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import PasswordStrengthIndicator, { usePasswordStrength } from "./PasswordStrengthIndicator";
 
 export default function SignUpForm() {
+  const router = useRouter();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -14,8 +16,6 @@ export default function SignUpForm() {
   
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
-  const [verifyUrl, setVerifyUrl] = useState<string | null>(null);
 
   const strength = usePasswordStrength(password);
 
@@ -23,7 +23,6 @@ export default function SignUpForm() {
     e.preventDefault();
     setIsLoading(true);
     setError(null);
-    setSuccess(null);
 
     // Basic client validation
     if (!name.trim()) {
@@ -54,11 +53,8 @@ export default function SignUpForm() {
       if (!res.ok) {
         setError(data.error || "Failed to create account. Please try again.");
       } else {
-        setSuccess(data.message || "Account created! Verify your email to continue.");
-        if (data.verifyUrl) setVerifyUrl(data.verifyUrl);
-        setName("");
-        setEmail("");
-        setPassword("");
+        const emailParam = data.email || email.trim().toLowerCase();
+        router.push(`/verify-email?email=${encodeURIComponent(emailParam)}`);
       }
     } catch (err) {
       console.error("[signup-form]", err);
@@ -78,20 +74,6 @@ export default function SignUpForm() {
       {error && (
         <div className="p-3 mb-4 rounded-lg bg-red-50 border border-red-200 text-sm text-red-700">
           {error}
-        </div>
-      )}
-
-      {success && (
-        <div className="p-4 mb-4 rounded-lg bg-[#fafafa] border border-gray-200 text-sm text-black space-y-2">
-          <p>{success}</p>
-          {verifyUrl && (
-            <a
-              href={verifyUrl}
-              className="inline-block mt-1 px-4 py-2 rounded-lg bg-[--accent] hover:bg-[--accent-hover] text-white font-medium text-xs transition-colors"
-            >
-              Click here to verify your email
-            </a>
-          )}
         </div>
       )}
 

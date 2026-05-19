@@ -5,13 +5,11 @@ function getFromAddress(): string {
   return "SecureGate <onboarding@resend.dev>";
 }
 
-export async function sendVerificationEmail(email: string, token: string) {
-  const verifyUrl = `${process.env.NEXTAUTH_URL || "http://localhost:3000"}/verify-email/${token}`;
-  
+export async function sendVerificationEmail(email: string, otp: string) {
   if (!process.env.RESEND_API_KEY || process.env.RESEND_API_KEY.startsWith("re_mock")) {
     console.log("\n=========================================");
     console.log(`[EMAIL SEND MOCK] Verification email to: ${email}`);
-    console.log(`Verification URL: ${verifyUrl}`);
+    console.log(`Your verification code is: ${otp}`);
     console.log("=========================================\n");
     return { success: true, data: null };
   }
@@ -21,20 +19,21 @@ export async function sendVerificationEmail(email: string, token: string) {
     const data = await new Resend(process.env.RESEND_API_KEY).emails.send({
       from: getFromAddress(),
       to: email,
-      subject: "Verify your email address",
+      subject: "Your SecureGate verification code",
       html: `
         <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 8px; background-color: #ffffff; color: #333333;">
           <h2 style="color: #6366f1;">Verify your SecureGate account</h2>
-          <p>Please click the button below to verify your email address. This link is valid for 15 minutes.</p>
-          <a href="${verifyUrl}" style="display: inline-block; background-color: #6366f1; color: white; padding: 10px 20px; text-decoration: none; border-radius: 6px; font-weight: bold; margin-top: 10px;">Verify Email</a>
-          <p style="margin-top: 20px; font-size: 12px; color: #888;">If you did not request this email, please ignore it.</p>
+          <p>Use the code below to verify your email address. This code is valid for 15 minutes.</p>
+          <div style="text-align: center; margin: 30px 0; padding: 20px; background: #f4f4f5; border-radius: 12px; letter-spacing: 8px; font-size: 32px; font-weight: bold; color: #333;">
+            ${otp}
+          </div>
+          <p style="font-size: 12px; color: #888;">If you did not request this code, please ignore this email.</p>
         </div>
       `,
     });
     return { success: true, data };
   } catch (error) {
     console.error("[sendVerificationEmail] Failed to send email via Resend:", error);
-    console.error("[sendVerificationEmail] If using onboarding@resend.dev, it can only send to the email address that owns the Resend API key. Add RESEND_FROM_ADDRESS env var with a verified domain sender (e.g. 'SecureGate <noreply@yourdomain.com>') in production.");
     return { success: false, error };
   }
 }
