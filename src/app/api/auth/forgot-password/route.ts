@@ -36,20 +36,16 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     const { email } = result.data;
     const normalizedEmail = email.trim().toLowerCase();
 
-    // SECURITY: Always return success message to client to prevent user enumeration
-    const successResponse = NextResponse.json(
-      { message: "If an account exists with that email, a reset link has been sent." },
-      { status: 200 }
-    );
-
     // 3. Find User
     const user = await prisma.user.findUnique({
       where: { email: normalizedEmail },
     });
 
     if (!user) {
-      // User doesn't exist, return success immediately
-      return successResponse;
+      return NextResponse.json(
+        { message: "If an account exists with that email, a reset link has been sent." },
+        { status: 200 }
+      );
     }
 
     // 4. Clean up any existing reset tokens for this email
@@ -74,9 +70,16 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     });
 
     // 6. Send Email via Resend
-    await sendPasswordResetEmail(normalizedEmail, token);
+    const resetUrl = `${process.env.NEXTAUTH_URL || "http://localhost:3000"}/reset-password/${token}`;
+    const emailSent = await sendPasswordResetEmail(normalizedEmail, token);
 
-    return successResponse;
+    return NextResponse.json(
+      {
+        message: "If an account exists with that email, a reset link has been sent.",
+        resetUrl: emailSent.success ? undefined : resetUrl,
+      },
+      { status: 200 }
+    );
   } catch (error) {
     console.error("[forgot-password]", error);
     return NextResponse.json(

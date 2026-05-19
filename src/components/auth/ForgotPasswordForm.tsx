@@ -9,6 +9,7 @@ export default function ForgotPasswordForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [resetUrl, setResetUrl] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,10 +35,8 @@ export default function ForgotPasswordForm() {
       if (!res.ok) {
         setError(data.error || "Failed to process request. Please try again.");
       } else {
-        setSuccess(
-          data.message ||
-            "If an account exists with that email, a reset link has been sent."
-        );
+        setSuccess(data.message || "A reset link has been sent to your email.");
+        if (data.resetUrl) setResetUrl(data.resetUrl);
         setEmail("");
       }
     } catch (err) {
@@ -66,8 +65,16 @@ export default function ForgotPasswordForm() {
       )}
 
       {success && (
-        <div className="p-3 mb-4 rounded-lg bg-gray-50 border border-gray-200 text-sm text-black">
-          {success}
+        <div className="p-4 mb-4 rounded-lg bg-[#fafafa] border border-gray-200 text-sm text-black space-y-2">
+          <p>{success}</p>
+          {resetUrl && (
+            <a
+              href={resetUrl}
+              className="inline-block mt-1 px-4 py-2 rounded-lg bg-[--accent] hover:bg-[--accent-hover] text-white font-medium text-xs transition-colors"
+            >
+              Click here to reset your password
+            </a>
+          )}
         </div>
       )}
 

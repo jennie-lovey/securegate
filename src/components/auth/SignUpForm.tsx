@@ -54,7 +54,7 @@ export default function SignUpForm() {
       if (!res.ok) {
         setError(data.error || "Failed to create account. Please try again.");
       } else {
-        setSuccess(data.message || "Account created! Check your email for a verification link.");
+        setSuccess(data.message || "Account created! Verify your email to continue.");
         if (data.verifyUrl) setVerifyUrl(data.verifyUrl);
         setName("");
         setEmail("");

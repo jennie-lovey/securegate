@@ -144,7 +144,7 @@ export default function LoginForm() {
       )}
 
       {success && (
-        <div className="p-3 mb-4 rounded-lg bg-gray-50 border border-gray-200 text-sm text-black">
+        <div className="p-3 mb-4 rounded-lg bg-[#fafafa] border border-gray-200 text-sm text-black">
           {success}
         </div>
       )}
