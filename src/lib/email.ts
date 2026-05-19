@@ -1,6 +1,8 @@
+import { Resend } from "resend";
+
+const resend = new Resend(process.env.RESEND_API_KEY || "re_mock_key");
+
 export async function sendVerificationEmail(email: string, token: string) {
-  const { Resend } = await import("resend");
-  const resend = new Resend(process.env.RESEND_API_KEY || "re_mock_key");
   const verifyUrl = `${process.env.NEXTAUTH_URL || "http://localhost:3000"}/verify-email/${token}`;
   
   // Log locally in development so we can copy-paste the URL
@@ -33,8 +35,6 @@ export async function sendVerificationEmail(email: string, token: string) {
 }
 
 export async function sendPasswordResetEmail(email: string, token: string) {
-  const { Resend } = await import("resend");
-  const resend = new Resend(process.env.RESEND_API_KEY || "re_mock_key");
   const resetUrl = `${process.env.NEXTAUTH_URL || "http://localhost:3000"}/reset-password/${token}`;
 
   // Log locally in development so we can copy-paste the URL
