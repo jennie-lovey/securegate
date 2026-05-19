@@ -80,7 +80,7 @@ export default function SignUpForm() {
       )}
 
       {success && (
-        <div className="p-3 mb-4 rounded-lg bg-gray-100 border border-gray-300 text-sm text-gray-700">
+        <div className="p-3 mb-4 rounded-lg bg-gray-50 border border-gray-200 text-sm text-black">
           {success}
         </div>
       )}
