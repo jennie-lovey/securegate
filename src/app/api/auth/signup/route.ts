@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
-import { signupRateLimiter } from "@/lib/rate-limit";
+import { getSignupRateLimiter } from "@/lib/rate-limit";
 import { generateToken, verificationExpiry } from "@/lib/tokens";
 import { sendVerificationEmail } from "@/lib/email";
 import { SALT_ROUNDS } from "@/lib/constants";
@@ -17,7 +17,8 @@ const signUpSchema = z.object({
 export async function POST(req: NextRequest): Promise<NextResponse> {
   // 1. Rate Limit check
   const ip = req.headers.get("x-forwarded-for") ?? "127.0.0.1";
-  const limitResult = await signupRateLimiter.limit(ip);
+  const limiter = await getSignupRateLimiter();
+  const limitResult = await limiter.limit(ip);
   if (!limitResult.success) {
     return NextResponse.json(
       { error: "Too many attempts. Please wait before trying again." },

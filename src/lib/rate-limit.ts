@@ -1,10 +1,11 @@
-import { Ratelimit } from "@upstash/ratelimit";
-import { Redis } from "@upstash/redis";
-
 // Fallback in-memory rate limiter for local development
 const memoryStore = new Map<string, { count: number; resetTime: number }>();
 
-class MemoryRateLimiter {
+interface RateLimiterInstance {
+  limit(ip: string): Promise<{ success: boolean; remaining: number }>;
+}
+
+class MemoryRateLimiter implements RateLimiterInstance {
   private limitCount: number;
   private windowMs: number;
 
@@ -31,36 +32,65 @@ class MemoryRateLimiter {
   }
 }
 
-function createRateLimiter(limitCount: number, windowStr: string, windowMs: number) {
-  if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) {
+let upstashRedis: InstanceType<typeof import("@upstash/redis").Redis> | null = null;
+
+async function getUpstash() {
+  if (upstashRedis) return upstashRedis;
+  if (!process.env.UPSTASH_REDIS_REST_URL || !process.env.UPSTASH_REDIS_REST_TOKEN) return null;
+  try {
+    const { Redis } = await import("@upstash/redis");
+    upstashRedis = new Redis({
+      url: process.env.UPSTASH_REDIS_REST_URL,
+      token: process.env.UPSTASH_REDIS_REST_TOKEN,
+    });
+    return upstashRedis;
+  } catch {
+    return null;
+  }
+}
+
+async function createRateLimiter(limitCount: number, windowStr: string, windowMs: number): Promise<RateLimiterInstance> {
+  const redis = await getUpstash();
+  if (redis) {
     try {
-      const redis = new Redis({
-        url: process.env.UPSTASH_REDIS_REST_URL,
-        token: process.env.UPSTASH_REDIS_REST_TOKEN,
-      });
+      const { Ratelimit } = await import("@upstash/ratelimit");
       return new Ratelimit({
         redis,
         limiter: Ratelimit.slidingWindow(limitCount, windowStr as any),
         analytics: true,
       });
     } catch (error) {
-      console.error("[rate-limit] Upstash initialization failed, using fallback:", error);
-      return new MemoryRateLimiter(limitCount, windowMs);
+      console.error("[rate-limit] Upstash ratelimit initialization failed, using fallback:", error);
     }
-  } else {
-    return new MemoryRateLimiter(limitCount, windowMs);
   }
+  return new MemoryRateLimiter(limitCount, windowMs);
 }
 
-// 5 attempts / 10 minutes
-export const loginRateLimiter = createRateLimiter(5, "10 m", 10 * 60 * 1000);
+// Lazy initialization — Upstash packages are only imported on first request
+let _loginRateLimiter: RateLimiterInstance | null = null;
+let _signupRateLimiter: RateLimiterInstance | null = null;
+let _forgotPasswordRateLimiter: RateLimiterInstance | null = null;
+let _resetPasswordRateLimiter: RateLimiterInstance | null = null;
 
-// 10 attempts / 1 hour
-export const signupRateLimiter = createRateLimiter(10, "1 h", 60 * 60 * 1000);
+async function getOrInit<T>(cache: { value: T | null }, factory: () => Promise<T>): Promise<T> {
+  if (!cache.value) {
+    cache.value = await factory();
+  }
+  return cache.value;
+}
 
-// 3 attempts / 15 minutes
-export const forgotPasswordRateLimiter = createRateLimiter(3, "15 m", 15 * 60 * 1000);
+export async function getLoginRateLimiter() {
+  return getOrInit({ value: _loginRateLimiter }, () => createRateLimiter(5, "10 m", 10 * 60 * 1000));
+}
 
-// 5 attempts / 15 minutes
-export const resetPasswordRateLimiter = createRateLimiter(5, "15 m", 15 * 60 * 1000);
-export type RateLimiter = Ratelimit | MemoryRateLimiter;
+export async function getSignupRateLimiter() {
+  return getOrInit({ value: _signupRateLimiter }, () => createRateLimiter(10, "1 h", 60 * 60 * 1000));
+}
+
+export async function getForgotPasswordRateLimiter() {
+  return getOrInit({ value: _forgotPasswordRateLimiter }, () => createRateLimiter(3, "15 m", 15 * 60 * 1000));
+}
+
+export async function getResetPasswordRateLimiter() {
+  return getOrInit({ value: _resetPasswordRateLimiter }, () => createRateLimiter(5, "15 m", 15 * 60 * 1000));
+}

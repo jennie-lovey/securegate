@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
-import { forgotPasswordRateLimiter } from "@/lib/rate-limit";
+import { getForgotPasswordRateLimiter } from "@/lib/rate-limit";
 import { generateToken, verificationExpiry } from "@/lib/tokens";
 import { sendVerificationEmail } from "@/lib/email";
 
@@ -12,7 +12,8 @@ const resendSchema = z.object({
 export async function POST(req: NextRequest): Promise<NextResponse> {
   // Rate Limit check (3 attempts / 15m)
   const ip = req.headers.get("x-forwarded-for") ?? "127.0.0.1";
-  const limitResult = await forgotPasswordRateLimiter.limit(ip);
+  const limiter = await getForgotPasswordRateLimiter();
+  const limitResult = await limiter.limit(ip);
   if (!limitResult.success) {
     return NextResponse.json(
       { error: "Too many attempts. Please wait before trying again." },
