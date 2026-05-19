@@ -1,6 +1,8 @@
 import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY || "");
+function getResend(): Resend {
+  return new Resend(process.env.RESEND_API_KEY || "re_mock_key");
+}
 
 function getFromAddress(): string {
   if (process.env.RESEND_FROM_ADDRESS) {
@@ -21,7 +23,7 @@ export async function sendVerificationEmail(email: string, token: string) {
   }
 
   try {
-    const data = await resend.emails.send({
+    const data = await getResend().emails.send({
       from: getFromAddress(),
       to: email,
       subject: "Verify your email address",
@@ -54,7 +56,7 @@ export async function sendPasswordResetEmail(email: string, token: string) {
   }
 
   try {
-    const data = await resend.emails.send({
+    const data = await getResend().emails.send({
       from: getFromAddress(),
       to: email,
       subject: "Reset your password",
