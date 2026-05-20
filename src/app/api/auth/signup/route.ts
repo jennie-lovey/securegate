@@ -108,16 +108,21 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     // 6. Send OTP via email
     const emailSent = await sendVerificationEmail(normalizedEmail, otp);
 
+    const isMock = "mock" in emailSent && emailSent.mock === true;
+
     const responseBody: Record<string, unknown> = {
-      message: emailSent.success
-        ? "Account created! Check your email for the verification code."
-        : "Account created! Use the code below to verify your email.",
+      message: isMock
+        ? "Account created! Use the verification code below."
+        : "Account created! Check your email for the verification code.",
       email: normalizedEmail,
       code: otp,
     };
 
     if (!emailSent.success) {
       responseBody.emailWarning = "Verification email failed to send. Please use the code shown or request a new one.";
+    } else if (isMock) {
+      responseBody.emailWarning =
+        "Email service not configured. Set RESEND_API_KEY in Vercel env vars to send real emails.";
     }
 
     return NextResponse.json(responseBody, { status: 200 });

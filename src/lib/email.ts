@@ -14,8 +14,12 @@ export async function sendVerificationEmail(email: string, otp: string) {
   console.log(`Code: ${otp}`);
   console.log("=========================================\n");
 
-  if (!process.env.RESEND_API_KEY || process.env.RESEND_API_KEY.startsWith("re_mock")) {
-    return { success: true, data: null };
+  const isMock =
+    !process.env.RESEND_API_KEY ||
+    process.env.RESEND_API_KEY.startsWith("re_mock");
+
+  if (isMock) {
+    return { success: true, mock: true as const, data: null };
   }
 
   try {
@@ -35,7 +39,7 @@ export async function sendVerificationEmail(email: string, otp: string) {
         </div>
       `,
     });
-    return { success: true, data };
+    return { success: true, mock: false as const, data };
   } catch (error) {
     console.error("[sendVerificationEmail] Failed to send email via Resend:", error);
     if (!process.env.RESEND_FROM_ADDRESS) {
@@ -43,19 +47,23 @@ export async function sendVerificationEmail(email: string, otp: string) {
         "[sendVerificationEmail] No RESEND_FROM_ADDRESS set. Using onboarding@resend.dev, which can only send to the email that owns the Resend API key. Add RESEND_FROM_ADDRESS (e.g. 'SecureGate <noreply@yourdomain.com>') with a verified domain in Resend."
       );
     }
-    return { success: false, error };
+    return { success: false, mock: false as const, error };
   }
 }
 
 export async function sendPasswordResetEmail(email: string, token: string) {
   const resetUrl = `${process.env.NEXTAUTH_URL || "http://localhost:3000"}/reset-password/${token}`;
 
-  if (!process.env.RESEND_API_KEY || process.env.RESEND_API_KEY.startsWith("re_mock")) {
+  const isMock =
+    !process.env.RESEND_API_KEY ||
+    process.env.RESEND_API_KEY.startsWith("re_mock");
+
+  if (isMock) {
     console.log("\n=========================================");
     console.log(`[EMAIL SEND MOCK] Password Reset email to: ${email}`);
     console.log(`Reset URL: ${resetUrl}`);
     console.log("=========================================\n");
-    return { success: true, data: null };
+    return { success: true, mock: true as const, data: null };
   }
 
   try {
@@ -73,10 +81,10 @@ export async function sendPasswordResetEmail(email: string, token: string) {
         </div>
       `,
     });
-    return { success: true, data };
+    return { success: true, mock: false as const, data };
   } catch (error) {
     console.error("[sendPasswordResetEmail] Failed to send email via Resend:", error);
     console.error("[sendPasswordResetEmail] If using onboarding@resend.dev, it can only send to the email address that owns the Resend API key. Add RESEND_FROM_ADDRESS env var with a verified domain sender (e.g. 'SecureGate <noreply@yourdomain.com>') in production.");
-    return { success: false, error };
+    return { success: false, mock: false as const, error };
   }
 }
