@@ -76,7 +76,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     return NextResponse.json(
       {
         message: "If an account exists with that email, a reset link has been sent.",
-        resetUrl: emailSent.success ? undefined : resetUrl,
+        ...(process.env.NODE_ENV === "development" && !emailSent.success && { resetUrl }),
       },
       { status: 200 }
     );

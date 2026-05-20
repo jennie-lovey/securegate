@@ -96,6 +96,7 @@ let _loginRateLimiter: RateLimiterInstance | null = null;
 let _signupRateLimiter: RateLimiterInstance | null = null;
 let _forgotPasswordRateLimiter: RateLimiterInstance | null = null;
 let _resetPasswordRateLimiter: RateLimiterInstance | null = null;
+let _resendVerificationRateLimiter: RateLimiterInstance | null = null;
 
 export async function getLoginRateLimiter() {
   if (!_loginRateLimiter) {
@@ -123,4 +124,11 @@ export async function getResetPasswordRateLimiter() {
     _resetPasswordRateLimiter = await createRateLimiter(5, "15 m", 15 * 60 * 1000);
   }
   return _resetPasswordRateLimiter;
+}
+
+export async function getResendVerificationRateLimiter() {
+  if (!_resendVerificationRateLimiter) {
+    _resendVerificationRateLimiter = await createRateLimiter(3, "15 m", 15 * 60 * 1000);
+  }
+  return _resendVerificationRateLimiter;
 }

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Eye, EyeOff, Loader2, ExternalLink } from "lucide-react";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
 import PasswordStrengthIndicator, { usePasswordStrength } from "./PasswordStrengthIndicator";
 
 export default function SignUpForm() {
@@ -17,6 +17,7 @@ export default function SignUpForm() {
   const [success, setSuccess] = useState<string | null>(null);
   const [verifyCode, setVerifyCode] = useState<string | null>(null);
   const [signedUpEmail, setSignedUpEmail] = useState<string | null>(null);
+  const [emailWarning, setEmailWarning] = useState<string | null>(null);
 
   const strength = usePasswordStrength(password);
 
@@ -58,6 +59,7 @@ export default function SignUpForm() {
         setSuccess(data.message);
         if (data.code) setVerifyCode(data.code);
         if (data.email) setSignedUpEmail(data.email);
+        if (data.emailWarning) setEmailWarning(data.emailWarning);
         setName("");
         setEmail("");
         setPassword("");
@@ -86,6 +88,11 @@ export default function SignUpForm() {
       {success && (
         <div className="p-4 mb-4 rounded-lg bg-[#fafafa] border border-gray-200 text-sm text-black space-y-2">
           <p>{success}</p>
+          {emailWarning && (
+            <div className="p-2 rounded bg-amber-50 border border-amber-200 text-amber-800 text-xs">
+              {emailWarning}
+            </div>
+          )}
           {verifyCode && (
             <div className="text-center py-3">
               <span className="text-2xl font-bold tracking-[8px] text-[--accent]">{verifyCode}</span>
@@ -93,7 +100,7 @@ export default function SignUpForm() {
           )}
           {verifyCode && (
             <p className="text-xs text-[--text-secondary]">
-              Use this code on the verification page or click the link sent to your email.
+              Enter this code on the verification page, or click the link sent to your email.
             </p>
           )}
           {verifyCode && signedUpEmail && (

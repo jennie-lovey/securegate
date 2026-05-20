@@ -38,6 +38,11 @@ export async function sendVerificationEmail(email: string, otp: string) {
     return { success: true, data };
   } catch (error) {
     console.error("[sendVerificationEmail] Failed to send email via Resend:", error);
+    if (!process.env.RESEND_FROM_ADDRESS) {
+      console.warn(
+        "[sendVerificationEmail] No RESEND_FROM_ADDRESS set. Using onboarding@resend.dev, which can only send to the email that owns the Resend API key. Add RESEND_FROM_ADDRESS (e.g. 'SecureGate <noreply@yourdomain.com>') with a verified domain in Resend."
+      );
+    }
     return { success: false, error };
   }
 }
